@@ -1,6 +1,7 @@
 package main
 
 import "os"
+
 import "encoding/xml"
 import "io/ioutil"
 import "net/http"
@@ -52,8 +53,9 @@ type SvgShibaRect struct {
 
 func main() {
 	userName := "0gajun"
+	timeZone := "Asia/Tokyo"
 	svgShiba := new(SvgShiba)
-	shibaSvgStr := getShibaSvgStr(userName)
+	shibaSvgStr := getShibaSvgStr(userName, timeZone)
 	if err := xml.Unmarshal([]byte(shibaSvgStr), svgShiba); err != nil {
 		fmt.Println("XML Unmarshal error: ", err)
 		return
@@ -105,8 +107,12 @@ func detectShibaType(color string) ShibaType {
 	return SHIBA_TYPE_UNDEFINED
 }
 
-func getShibaSvgStr(usr string) string {
-	response, _ := http.Get("https://github.com/users/" + usr + "/contributions")
+func getShibaSvgStr(usr string, timeZone string) string {
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", "https://github.com/users/"+usr+"/contributions", nil)
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Cookie", "tz="+timeZone)
+	response, _ := client.Do(req)
 	body, _ := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
 	return string(body)
