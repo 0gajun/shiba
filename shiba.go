@@ -1,11 +1,12 @@
 package main
 
-import "os"
-
-import "encoding/xml"
-import "io/ioutil"
-import "net/http"
-import "fmt"
+import (
+	"encoding/xml"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+)
 
 const DAY_OF_WEEK = 7
 
@@ -51,17 +52,23 @@ type SvgShibaRect struct {
 	Color string `xml:"fill,attr"`
 }
 
-func main() {
-	userName := "0gajun"
-	timeZone := "Asia/Tokyo"
+func Show(userName string) {
+	timeZone := "Asia/Tokyo" // TODO: Get local timezone
 	svgShiba := new(SvgShiba)
-	shibaSvgStr := getShibaSvgStr(userName, timeZone)
+	shibaSvgStr, err := getShibaSvgStr(userName, timeZone)
+
+	if err != nil {
+		fmt.Println("Cannot get contribution data")
+		fmt.Println("Unknown user: ", userName)
+		return
+	}
+
 	if err := xml.Unmarshal([]byte(shibaSvgStr), svgShiba); err != nil {
 		fmt.Println("XML Unmarshal error: ", err)
 		return
 	}
-	shiba := svgToShiba(svgShiba)
-	printShiba(userName, shiba)
+	shibaObj := svgToShiba(svgShiba)
+	printShiba(userName, shibaObj)
 }
 
 func svgToShiba(svgShiba *SvgShiba) Shiba {
@@ -107,15 +114,20 @@ func detectShibaType(color string) ShibaType {
 	return SHIBA_TYPE_UNDEFINED
 }
 
-func getShibaSvgStr(usr string, timeZone string) string {
+func getShibaSvgStr(usr string, timeZone string) (string, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", "https://github.com/users/"+usr+"/contributions", nil)
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Cookie", "tz="+timeZone)
-	response, _ := client.Do(req)
+	response, err := client.Do(req)
+
+	if err != nil || response.StatusCode != 200 {
+		return "", fmt.Errorf("Cannot get contribution data")
+	}
+
 	body, _ := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
-	return string(body)
+	return string(body), nil
 }
 
 func printShiba(userName string, shiba Shiba) {
