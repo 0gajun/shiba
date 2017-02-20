@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 const DAY_OF_WEEK = 7
@@ -53,7 +54,7 @@ type SvgShibaRect struct {
 }
 
 func Show(userName string) {
-	timeZone := "Asia/Tokyo" // TODO: Get local timezone
+	timeZone := getTimeZone()
 	svgShiba := new(SvgShiba)
 	shibaSvgStr, err := getShibaSvgStr(userName, timeZone)
 
@@ -67,8 +68,15 @@ func Show(userName string) {
 		fmt.Println("XML Unmarshal error: ", err)
 		return
 	}
+
 	shibaObj := svgToShiba(svgShiba)
 	printShiba(userName, shibaObj)
+}
+
+func getTimeZone() string {
+	t := time.Now()
+	zone, _ := t.Zone()
+	return zone
 }
 
 func svgToShiba(svgShiba *SvgShiba) Shiba {
