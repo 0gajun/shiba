@@ -11,10 +11,14 @@ func usage() {
 	fmt.Println("\tshiba - The viewer of GitHub's contribution graph")
 	fmt.Println()
 	fmt.Println("USAGE:")
-	fmt.Println("\tshiba [username]")
+	fmt.Println("\tshiba [username] [--tz <timezone>]")
 	fmt.Println()
 	fmt.Println("ARGUMENT:")
 	fmt.Println("\tusername\tGitHub's username(You can also specify this using environment variable, 'SHIBA_GITHUB_USER_NAME')")
+	fmt.Println()
+	fmt.Println("OPTION:")
+	fmt.Println("\t--tz\tLocal time zone with IANA TZ Database format, like 'Asia/Tokyo'.")
+	fmt.Println("\t\tYou can also specify this using environment variable, 'SHIBA_TIME_ZONE')")
 	fmt.Println()
 	fmt.Println("AUTHOR:")
 	fmt.Println("\t0gajun <oga.ivc.s27@gmail.com>")
@@ -27,11 +31,15 @@ func usage() {
 
 func main() {
 	var userName = ""
-	var isHelp = false
+	var (
+		isHelp   = false
+		timeZone = ""
+	)
 
 	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	f.BoolVar(&isHelp, "help", false, "show help")
 	f.BoolVar(&isHelp, "h", false, "show help")
+	f.StringVar(&timeZone, "tz", "", "local time zone")
 
 	f.Parse(os.Args[1:])
 	for 0 < f.NArg() {
@@ -41,6 +49,14 @@ func main() {
 	if isHelp {
 		usage()
 		return
+	}
+
+	if timeZone == "" {
+		if envTz := os.Getenv("SHIBA_LOCAL_TIME_ZONE"); envTz != "" {
+			timeZone = envTz
+		} else {
+			timeZone = "Asia/Tokyo"
+		}
 	}
 
 	if len(os.Args) == 2 {
@@ -54,5 +70,5 @@ func main() {
 		return
 	}
 
-	Show(userName)
+	Show(userName, timeZone)
 }

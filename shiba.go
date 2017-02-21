@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 )
 
 const DAY_OF_WEEK = 7
@@ -53,8 +52,7 @@ type SvgShibaRect struct {
 	Color string `xml:"fill,attr"`
 }
 
-func Show(userName string) {
-	timeZone := getTimeZone()
+func Show(userName string, timeZone string) {
 	svgShiba := new(SvgShiba)
 	shibaSvgStr, err := getShibaSvgStr(userName, timeZone)
 
@@ -70,13 +68,11 @@ func Show(userName string) {
 	}
 
 	shibaObj := svgToShiba(svgShiba)
-	printShiba(userName, shibaObj)
-}
 
-func getTimeZone() string {
-	t := time.Now()
-	zone, _ := t.Zone()
-	return zone
+	fmt.Println()
+	fmt.Printf("TimeZone: %s\n", timeZone)
+	fmt.Printf("User:     %s\n\n", userName)
+	printShiba(userName, shibaObj)
 }
 
 func svgToShiba(svgShiba *SvgShiba) Shiba {
@@ -143,7 +139,6 @@ func getShibaSvgStr(usr string, timeZone string) (string, error) {
 }
 
 func printShiba(userName string, shiba Shiba) {
-	fmt.Printf("User: %s\n\n", userName)
 	for _, row := range shiba {
 		for _, shibaType := range row {
 			printShibaRect(shibaType)
