@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/briandowns/spinner"
 )
 
 const DAY_OF_WEEK = 7
@@ -53,26 +56,39 @@ type SvgShibaRect struct {
 }
 
 func Show(userName string, timeZone string) {
-	svgShiba := new(SvgShiba)
-	shibaSvgStr, err := getShibaSvgStr(userName, timeZone)
+	sp := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	sp.Suffix = " Fetching shiba..."
+	sp.Prefix = " "
+	sp.Start()
+
+	shibaObj, err := loadShiba(userName, timeZone)
+
+	sp.Stop()
 
 	if err != nil {
-		fmt.Println("Cannot get contribution data")
-		fmt.Println("Unknown user: ", userName)
+		fmt.Println(err)
 		return
 	}
-
-	if err := xml.Unmarshal([]byte(shibaSvgStr), svgShiba); err != nil {
-		fmt.Println("XML Unmarshal error: ", err)
-		return
-	}
-
-	shibaObj := svgToShiba(svgShiba)
 
 	fmt.Println()
 	fmt.Printf("TimeZone: %s\n", timeZone)
 	fmt.Printf("User:     %s\n\n", userName)
 	printShiba(userName, shibaObj)
+}
+
+func loadShiba(userName string, timeZone string) (Shiba, error) {
+	shibaSvgStr, err := getShibaSvgStr(userName, timeZone)
+
+	if err != nil {
+		return nil, fmt.Errorf("Cannot get contribution data\nUnknown user: %s", userName)
+	}
+
+	svgShiba := new(SvgShiba)
+	if err := xml.Unmarshal([]byte(shibaSvgStr), svgShiba); err != nil {
+		return nil, fmt.Errorf("XML Unmarshal error: ", err)
+	}
+
+	return svgToShiba(svgShiba), nil
 }
 
 func svgToShiba(svgShiba *SvgShiba) Shiba {
