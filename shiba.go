@@ -129,11 +129,11 @@ func detectShibaType(color string) ShibaType {
 		return SHIBA_TYPE_NONE
 	}
 
-	fmt.Errorf("Unknown Shiba color : %s\n", color)
-	fmt.Errorf("Is today special day? (like Haloween)\n")
-	fmt.Errorf("If today is special day, the GitHub sometimes change shiba colors\n")
-	fmt.Errorf("So, please create issue and paste shiba color codes!\n")
-	fmt.Errorf("-> https://github.com/0gajun/shiba/issues\n")
+	fmt.Fprintf(os.Stderr, "Unknown Shiba color : %s\n", color)
+	fmt.Fprintf(os.Stderr, "Is today special day? (like Haloween)\n")
+	fmt.Fprintf(os.Stderr, "If today is special day, the GitHub sometimes change shiba colors\n")
+	fmt.Fprintf(os.Stderr, "So, please create issue and paste shiba color codes!\n")
+	fmt.Fprintf(os.Stderr, "-> https://github.com/0gajun/shiba/issues\n")
 	os.Exit(-1)
 	return SHIBA_TYPE_UNDEFINED
 }
