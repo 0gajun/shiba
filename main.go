@@ -70,5 +70,5 @@ func main() {
 		return
 	}
 
-	Show(userName, timeZone)
+	os.Exit(Show(userName, timeZone))
 }
