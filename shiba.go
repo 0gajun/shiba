@@ -55,7 +55,7 @@ type SvgShibaRect struct {
 	Color string `xml:"fill,attr"`
 }
 
-func Show(userName string, timeZone string) {
+func Show(userName string, timeZone string) int {
 	sp := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	sp.Suffix = " Fetching shiba..."
 	sp.Prefix = " "
@@ -67,13 +67,15 @@ func Show(userName string, timeZone string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return 1
 	}
 
 	fmt.Println()
 	fmt.Printf("TimeZone: %s\n", timeZone)
 	fmt.Printf("User:     %s\n\n", userName)
 	printShiba(userName, shibaObj)
+
+	return 0
 }
 
 func loadShiba(userName string, timeZone string) (Shiba, error) {
